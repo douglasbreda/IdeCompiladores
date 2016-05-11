@@ -9,7 +9,7 @@ Tabela de Símbolos
  - Estes símbolos são utilizados para identificação de tokens no programa.
  
 |  Id  |  Definição                                       |
-|---------------------------------------------------------|
+|------|--------------------------------------------------|
 | #1   | Identifica o tipo das variáveis                  |
 | #2   | Define o nome das variáveis                      |
 | #3   | Identificação de vetores                         |
