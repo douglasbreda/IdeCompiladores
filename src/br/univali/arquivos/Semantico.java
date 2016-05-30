@@ -19,7 +19,7 @@ public class Semantico implements Constants
                 Ide.tbSimbolos.DefinirModificador(token.getLexeme());
                 break;
             case 5:
-                Ide.tbSimbolos.AtribuirValorVariavel();
+                Ide.tbSimbolos.AtribuirValorVariavel(token.getLexeme());
                 break;
             case 6:
                 Ide.tbSimbolos.DefinirEscopo("if");
@@ -70,6 +70,10 @@ public class Semantico implements Constants
             case 21:
                 Ide.tbSimbolos.InicializarVariavel();
                 break;
+            case 22:
+                Ide.tbSimbolos.DefinirTamanhoVetor(token.getLexeme());
+                break;
+                
                 
         }
     }	

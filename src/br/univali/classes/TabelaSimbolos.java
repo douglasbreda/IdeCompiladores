@@ -155,20 +155,29 @@ public class TabelaSimbolos {
     }
 
     //Seta o símbolo como utilizado quando tem uma valor atribuído a ele
-    public void AtribuirValorVariavel() throws SemanticError {
-        if (oSimbolo != null ) {
+    public void AtribuirValorVariavel(Object pValor) throws SemanticError {
+        if (oSimbolo != null) 
+        {
 //            if(oSimbolo.Inicializada)
 //                oSimbolo.Usada = true;
 //            else
-            if(!oSimbolo.Inicializada)
+            if (!oSimbolo.Inicializada) {
                 throw new SemanticError("A variável '" + oSimbolo.Nome + "' deve ser inicializada");
+            }
+        } 
+        else if (pValor != null) 
+        {
+            lstSimbolos.get(lstSimbolos.size() - 1).Valor = pValor;
         }
 //        }else{
 //            lstSimbolos.get(lstSimbolos.size() - 1).Usada = true;
 //        }
     }
     
-    
+    //Define o tamanho do vetor
+    public void DefinirTamanhoVetor(Object pValor){
+        lstSimbolos.get(lstSimbolos.size() - 1).Valor = pValor;
+    }
 
     ///Retorna a lista de simbolos para a criação da tabela 
     public List<Simbolos> GetListaSimbolos() {
