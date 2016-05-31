@@ -73,6 +73,10 @@ public class Semantico implements Constants
             case 22:
                 Ide.tbSimbolos.DefinirTamanhoVetor(token.getLexeme());
                 break;
+            case 23:
+                Ide.tbSimbolos.AtribuirValReadWrite(token.getLexeme());
+                break;
+                
                 
                 
         }

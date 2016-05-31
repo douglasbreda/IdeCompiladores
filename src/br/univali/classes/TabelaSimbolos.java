@@ -246,4 +246,11 @@ public class TabelaSimbolos {
     public int GetNumWarnings(){
         return iNumWarnings;
     }
+    
+    //Define na coluna o valor o que foi atribuido entre parenteses nos comandos Write e Read
+    public void AtribuirValReadWrite(Object pValor)
+    {
+        if(lstSimbolos.get(lstSimbolos.size() - 1).Tipo.equals("Comando"))
+            lstSimbolos.get(lstSimbolos.size() - 1).Valor = pValor;
+    }
 }

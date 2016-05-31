@@ -1,0 +1,273 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+Package = br.univali.arquivos
+ScannerCaseSensitive = true
+ScannerTable = Compact
+Input = String
+Parser = SLR
+#RegularDefinitions
+INT: [0-9]*
+FLOAT: [0-9]+\.[0-9]+
+NOMES: [a-zA-Z_]+[0-9]*
+STRING: \".*\"
+TIPO_CHAR:'.*'
+COMENTARIOLINHA: [/]+[/].*
+//COMENTARIOS: (([/][\*][" "-~\n]*)?)|([\*][/]) 
+COMENTARIOS: \*([\r\n]|(\*+([\r\n])))*\*+
+IGNORAVEIS: [\s\r\t\n]*
+#Tokens
+
+//Palavras reservadas
+IF: "if"
+ELSE: "else"
+FOR:"for"
+DO: "do"
+WHILE: "while"
+FOREACH: "foreach"
+CLASS: "class"
+BOOL: "bool"
+TRUE: "true"
+FALSE:"false"
+NEW: "new"
+INT: "int"
+NEW: "new"
+CONST:"const"
+IS: "is"
+PUBLIC: "public"
+PRIVATE : "private"
+PROTECTED : "protected"
+ABSTRACT: "abstract"
+CHAR: "char"
+STRING: "string"
+DOUBLE: "double"
+INTERFACE: "interface"
+STATIC: "static"
+SWITCH: "switch"
+CASE: "case"
+VOID: "void"
+RETURN: "return"
+WRITE: "Write"
+READ: "Read"
+MAIN: "main"
+"in"
+
+//Delimitadores
+"[]"
+"."
+"++"
+"--"
+";"
+"="
+"("
+")"
+"["
+"]"
+"{"
+"}"
+","
+
+//Operadores atirméticos
+"+"
+"-"
+"*"
+"/"
+"%"
+
+//Operadores lógicos
+"||"
+"&&"
+"=="
+"!="
+"<"
+">"
+">="
+"<="
+"!"
+
+
+//Operadores bit a bit
+"^"
+"<<"
+">>"
+"~"
+"|"
+"&"
+"/*"
+"*/"
+
+COMENTARIOLINHA: {COMENTARIOLINHA}
+COMENTARIOS: {COMENTARIOS}
+
+//Valores
+VAL_DECIMAL: {FLOAT}
+VAL_INTEIRO: {INT}
+VAL_STRING: {STRING}
+VAL_TIPO_CHAR: {TIPO_CHAR}
+
+VARIAVEIS: {NOMES}+
+: {IGNORAVEIS}
+
+#NonTerminals
+<programa>
+<codigo>
+<tipo>	
+<varchar>
+<varstring>
+<vardouble>
+<varint>
+<varbool>
+<valores>
+<if>
+<else>
+<condicoes>
+<compara>
+<condicao_if>
+<condicao_else>
+<condicao_for>
+<incdec>
+<l_while>
+<l_for>
+<l_do_while>
+<l_foreach>
+<condicao_foreach>
+<declaracao_var>
+<comparadores_laco>
+<vetor>
+<declaracao_vetor>
+<entradas_saidas>
+<entrada>
+<saida>
+<funcao>
+<modificadores>
+<parametros>
+<comentarios>
+<operacoes>
+<operacoes1>
+<operacoes2>
+<operacoes3>
+<operacoes4>
+<operacoes5>
+<operacoes6>
+<operacoes7>
+<operacoes8>
+<operacoes9>
+<operacoes10>
+<op_rel>
+<op_neg>
+<op_bitwise>
+<op_arit_baixa>
+<op_arit_alta>
+<val_vetor_op>
+<comentario_mult>
+
+
+#Grammar
+//Define a função inicial
+<programa> ::= STATIC VOID MAIN "(" ")" "{" <codigo> "}"; 
+
+//Contém todo o código do programa
+<codigo> ::= <tipo> | î;
+
+//Operações aritméticas, lógicas e outras...
+<operacoes>  ::= <operacoes> "||" <operacoes1> | <operacoes1> ;
+<operacoes1> ::= <operacoes1> "&&" <operacoes2> | <operacoes2> ;
+<operacoes2> ::= <operacoes2> "|" <operacoes3> | <operacoes3> ;
+<operacoes3> ::= <operacoes3> "^" <operacoes4> | <operacoes4> ;
+<operacoes4> ::= <operacoes4> "&" <operacoes5> | <operacoes5> ;
+<operacoes5> ::= <operacoes5> <op_rel> <operacoes6> | <operacoes6> ;
+<operacoes6> ::= <operacoes6> <op_bitwise> <operacoes7> | <operacoes7> ;
+<operacoes7> ::= <operacoes7> <op_arit_baixa> <operacoes8>  | <operacoes8> ;
+<operacoes8> ::= <operacoes8> <op_arit_alta> <operacoes9> | <operacoes9> ;
+<operacoes9> ::= <op_neg> <operacoes10> | <operacoes10> ;
+<operacoes10> ::= VAL_INTEIRO #5 | VAL_DECIMAL #5 | VAL_STRING #5 | VAL_TIPO_CHAR #5 | <val_vetor_op> | VARIAVEIS #12 | "(" <operacoes> ")";
+<op_rel> ::= ">" | "<" | ">=" | "<=" | "=" | "!="; 
+<op_neg> ::= "-" | "~" | "!";
+<op_bitwise> ::= "<<" | ">>";
+<op_arit_baixa> ::= "+" | "-";
+<op_arit_alta> ::= "*" | "/" | "%";
+<tipo> ::= <varstring> | <varchar> | <vardouble> | <varint> | <varbool> |
+	   <condicoes> | <incdec> | <vetor> | <entradas_saidas> | <modificadores> 
+	   | <funcao> | <comentarios> | <operacoes> ";" | <operacoes> ";" <tipo> | <val_vetor_op>;
+
+//Tipos de variáveis e vetores
+<declaracao_var> ::= STRING #1 | CHAR #1 | DOUBLE #1 | INT #1 | <declaracao_vetor>;
+
+//Declaração de vetor
+<declaracao_vetor> ::= STRING #1 "[]"#3| CHAR #1 "[]"#3| DOUBLE #1 "[]"#3| INT #1 "[]"#3;
+
+//Armazena os desvios condicionais e laços
+<condicoes> ::= <if> | <l_while> | <l_for> | <l_do_while> | <l_foreach>;
+
+//Entrada e saída do usuário
+<entradas_saidas> ::= <entrada> | <saida>;
+
+//Modificadores de classes e variáveis
+<modificadores> ::= PUBLIC #4 | PRIVATE #4 | PROTECTED #4 | VOID #4 | STATIC #4;
+
+//Comentários
+<comentarios> ::= COMENTARIOLINHA | <comentario_mult> | COMENTARIOLINHA <tipo> | <comentario_mult> <tipo>;
+<comentario_mult> ::= "/*" VARIAVEIS "*/";
+
+//Comparadores gerais
+<comparadores_laco> ::= "=" | "=="| "!=" | "<"| ">"| ">="| "<=";
+<compara> ::= "||" | "&&" |"=="| "!=" | "<" | ">"| ">="| "<=" | IS;
+//#1 identifica o tipo da variável
+//#2 identifica o nome da variável
+
+//Valores das variáveis
+<valores> ::= VAL_DECIMAL #5 | VAL_INTEIRO #5 | VAL_STRING #5 | VAL_TIPO_CHAR #5 | VARIAVEIS #12;
+
+//Variáveis para usar em incrementações e decrementações
+<incdec> ::= VARIAVEIS "++" ";"| VARIAVEIS "--" ";"| "++" | "--";
+
+//Condições if, else e laços
+<condicao_if> ::= <valores> <compara> <valores> | <valores> <compara> <valores> "&&" <condicao_if> | <valores> <compara> <valores> "||" <condicao_if> ;
+<condicao_else> ::= ELSE "{"#7 "}" #20 | ELSE "{"#7 <tipo> "}" #20 | ELSE <if> | ELSE <if> |ELSE "{"#7 "}" #20 <tipo> | ELSE "{"#7 <tipo> "}" #20 <tipo> | <tipo>;
+<condicao_for> ::= <declaracao_var> VARIAVEIS #2 <comparadores_laco> <valores> ";" VARIAVEIS #2 <comparadores_laco> <valores> ";" VARIAVEIS #2 <incdec>;
+<condicao_foreach> ::= <declaracao_var> VARIAVEIS #2 "in" VARIAVEIS #2;
+
+//Declarações de variáveis
+<varchar> ::= CHAR #1 VARIAVEIS #2";" <tipo> | CHAR #1 VARIAVEIS #2 "=" #21 VAL_TIPO_CHAR #5 ";" <tipo> | CHAR #1 VARIAVEIS #2 ";" | CHAR #1 VARIAVEIS #2 "=" #21 VAL_TIPO_CHAR #5 ";";
+<varstring> ::= STRING #1 VARIAVEIS #2 ";" <tipo> | STRING #1 VARIAVEIS #2 "=" #21 VAL_STRING #5 ";" <tipo> | STRING #1 VARIAVEIS #2 ";" | STRING #1 VARIAVEIS #2 "=" #21 VAL_STRING #5 ";";
+<vardouble> ::= DOUBLE #1 VARIAVEIS #2 ";" <tipo> | DOUBLE #1 VARIAVEIS #2 "=" #21 VAL_DECIMAL #5 ";" <tipo> | DOUBLE #1 VARIAVEIS #2 ";" | DOUBLE #1 VARIAVEIS #2 "=" #21 VAL_DECIMAL #5 ";";
+<varint> ::= INT #1 VARIAVEIS #2 ";" <tipo> | INT #1 VARIAVEIS #2 "=" #21 VAL_INTEIRO #5 ";" <tipo> | INT #1 VARIAVEIS #2 ";" | INT #1 VARIAVEIS #2 "=" #21 VAL_INTEIRO #5 ";";
+<varbool> ::= BOOL #1 VARIAVEIS #2 ";" <tipo> | BOOL #1 VARIAVEIS #2 "=" #21 TRUE #5 ";" <tipo> | BOOL #1 VARIAVEIS #2 "=" #21 FALSE #5 ";" <tipo> | BOOL #1 VARIAVEIS #2 ";" |BOOL #1 VARIAVEIS #2 "=" #21 TRUE #5 ";" | BOOL #1 VARIAVEIS #2 "=" #21 FALSE #5 ";";
+<val_vetor_op> ::= VARIAVEIS "[" VAL_INTEIRO #22 "]";
+
+//Declarações dos laços
+<if> ::= IF  "(" <valores> ")" "{" #6 "}" #20 | IF "(" <valores> ")" "{" #6 <tipo> "}" #20 | IF "(" <condicao_if> ")" "{" #6 "}" #20 | IF "(" <condicao_if> ")" "{" #6 <tipo> "}" #20 | IF "(" <condicao_if> ")" "{" #6 <tipo> "}" #20 <condicao_else> | IF "(" <condicao_if> ")" "{"#6 "}" #20 <condicao_else>;
+<l_while> ::= WHILE "(" <condicao_if> ")" "{" #8 "}" #20 | WHILE "(" <condicao_if> ")" "{" #8 <tipo> "}" #20 | WHILE "(" <condicao_if> ")" "{" #8 "}" #20 <condicoes> |  WHILE "(" <condicao_if> ")" "{" #8 <tipo> "}" #20 <condicoes>;
+<l_for> ::= FOR "(" <condicao_for> ")" "{" #9 "}" | FOR "(" <condicao_for> ")" "{" #9 <tipo> "}" | FOR "(" <condicao_for> ")" "{" #9 <tipo> "}" <condicoes> | FOR "(" <condicao_for> ")" "{" #9 "}" <condicoes>;
+<l_do_while> ::= DO "{" #10 "}" #20 WHILE "(" <condicao_if> ")" ";" | DO "{" #10 <tipo> "}" #20 WHILE "(" <condicao_if> ")" ";" | DO "{" #10 "}" #20 WHILE "(" <condicao_if> ")" ";" <condicoes> | DO "{" #10 <tipo> "}" #20 WHILE "(" <condicao_if> ")" ";" <condicoes>;
+<l_foreach> ::= FOREACH "(" <condicao_foreach> ")" "{" #11 "}" #20 | FOREACH "(" <condicao_foreach> ")" "{" #11 <tipo> "}" #20 | FOREACH "(" <condicao_foreach> ")" "{" #11 <tipo> "}" #20 <condicoes> | FOREACH "(" <condicao_foreach> ")" "{" #11 "}" #20 <condicoes>;
+
+//Declaração do vetor
+<vetor> ::= <declaracao_vetor> VARIAVEIS #2 ";" | <declaracao_vetor> VARIAVEIS #2 "=" #21 NEW <declaracao_var> "[" VAL_INTEIRO #22 "]" ";";
+
+//Declaração de entradas e saídas
+<entrada> ::= WRITE #16 "(" #18 VARIAVEIS #23 ")" ";" | WRITE #16 "(" #18 VARIAVEIS #23 ")" ";" <tipo>;
+<saida> ::= READ #15 "(" #17 VARIAVEIS #23 ")" ";" | READ #15 "(" #17 VARIAVEIS #23 ")" ";" <tipo>;
+
+//Definição de parametros
+<parametros> ::= <declaracao_var> VARIAVEIS #19| <declaracao_var> VARIAVEIS #19 "," <parametros>;
+
+//Definição de funções
+<funcao> ::= VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 "}" #20 <tipo> | VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 <tipo> "}" #20 <tipo> | VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 "}" #20 <tipo> |
+	     VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 <tipo> "}" #20 <tipo> |<modificadores> VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 "}" #20 <tipo>  |
+	     <modificadores> VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 <tipo> "}" #20 <tipo>  |<modificadores> VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 <tipo> "}" #20 <tipo> |
+	     <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 ")" "{" #14 "}" #20 <tipo> |
+	     <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 ")" "{" #14 <tipo> "}" #20 <tipo>  |
+	     <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 "}" #20 <tipo> |
+              <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 <tipo> "}" #20 <tipo> |
+              VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 "}" #20 | VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 <tipo> "}" #20 |
+              VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 "}" #20 | VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 <tipo> "}" #20 |
+              <modificadores> VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 "}" #20 | <modificadores> VOID #1 VARIAVEIS #2 "(" #13 ")" "{" #14 <tipo> "}" #20 |
+              <modificadores> VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 <tipo> "}" #20 |<modificadores> <declaracao_var> VARIAVEIS #2 "(" #13")" "{" #14 "}" #20 |
+              <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 ")" "{" #14 <tipo> "}" #20 | 
+              <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 "}" #20 | <modificadores> <declaracao_var> VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 <tipo> "}" #20 | 
+              <modificadores> VOID #1 VARIAVEIS #2 "(" #13 <parametros> ")" "{" #14 "}" #20;

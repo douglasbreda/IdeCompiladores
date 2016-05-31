@@ -1,3 +1,6 @@
 .data
-teste: 0,0,0,0,0,0,0,0,0,0
+iGlobal : 0
 .text
+LD    $in_port
+STO    i
+
