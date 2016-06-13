@@ -1,6 +1,9 @@
 .data
-iGlobal : 0
+a_Global : 0
 .text
+LD    $out_port
+STO    a_Global
+LD    5_Global
+STO   a_Global
 LD    $in_port
-STO    i
-
+STO    4

@@ -34,6 +34,12 @@ public class Simbolos {
     public String Modificador = "";
     //Define o valor da variável
     public Object Valor = null;
+    //Controla as variáveis que são de histórico
+    public boolean EhHistorico = false;
+    //Contém a expressão atribuída a uma variável
+    public String Expressao = "";
+    //Define qual o operador 
+    public String Operador = "";
     
     public Simbolos() 
     {

@@ -1,11 +1,9 @@
 package br.univali.arquivos;
 
+public class Semantico implements Constants {
 
-public class Semantico implements Constants
-{
-    public void executeAction(int action, Token token)	throws SemanticError
-    {
-        switch(action){
+    public void executeAction(int action, Token token) throws SemanticError {
+        switch (action) {
             case 1:
                 Ide.tbSimbolos.CriarVariavelTipo(token.getLexeme(), token.getPosition(), token.getId());
                 break;
@@ -53,13 +51,15 @@ public class Semantico implements Constants
                 Ide.tbSimbolos.AdicionarComandoRead(token.getPosition(), token.getId());
                 break;
             case 16:
-                Ide.tbSimbolos.AdicionarComandoWrite(token.getPosition(),token.getId());
+                Ide.tbSimbolos.AdicionarComandoWrite(token.getPosition(), token.getId());
                 break;
             case 17:
-                Ide.tbSimbolos.DefinirEscopo("Read");
+                //Ide.tbSimbolos.DefinirEscopo("Read");
+                Ide.tbSimbolos.DefinirEscopo("Global");
                 break;
             case 18:
-                Ide.tbSimbolos.DefinirEscopo("Write");
+//                Ide.tbSimbolos.DefinirEscopo("Write");
+                Ide.tbSimbolos.DefinirEscopo("Global");
                 break;
             case 19:
                 Ide.tbSimbolos.DefinirParametros(token.getLexeme());
@@ -76,9 +76,32 @@ public class Semantico implements Constants
             case 23:
                 Ide.tbSimbolos.AtribuirValReadWrite(token.getLexeme());
                 break;
-                
-                
-                
+            case 29:
+                Ide.tbSimbolos.IniciarAtribuicao();
+                break;
+            case 24:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 30:
+            case 31:
+            case 32:
+            case 33:
+                Ide.tbSimbolos.DefinirOperacao(token.getLexeme());
+                break;
+            case 34:
+                Ide.tbSimbolos.FinalizarExpressao();
+                break;
+            case 35:
+                Ide.tbSimbolos.AdicionarValoresVetor();
+                break;
+            case 36:
+                Ide.tbSimbolos.DefinirIndiceVetor(token.getLexeme());
+                break;
+            case 37:
+                Ide.tbSimbolos.DefinirAssemblyVetor();
+
         }
-    }	
+    }
 }
