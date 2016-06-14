@@ -1,0 +1,4 @@
+static void main(){
+int[] x = new int[3];
+Write(x[0]);
+}

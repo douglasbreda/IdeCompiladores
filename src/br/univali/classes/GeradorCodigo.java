@@ -16,10 +16,19 @@ public class GeradorCodigo {
     private List<String> lstText = new ArrayList<>();
     private List<String> lstSimboloData = new ArrayList<>();
     private int iEspacoMemoria = 1000;
+    private StringBuilder sbTemp = new StringBuilder();
+    private List<String> lstOperador = new ArrayList<>();
     
+    ///Atribui os valores apenas temporariamente quando há operações com vetores
+    public boolean bAtribuirTemporariamente = false;
     
     public GeradorCodigo() {
     }
+    //Cria os comandos temporários quando há operações com vetores
+    public void CriarValoresTemp(){
+        
+    }
+    
     
     //Atribui os valores simples de LD/LDI e STO
     public void AtribuirText(String pVarStorage,Object pValor, boolean pOperacaoComVetor){
@@ -38,8 +47,17 @@ public class GeradorCodigo {
                     sbComando.append("LD\t\t").append(pVarStorage);
                 }
             }
-
-            lstText.add(sbComando.toString());
+            
+            PreencherListaText(sbComando);
+        }
+    }
+    
+    private void PreencherListaText(StringBuilder pSbComando){
+        
+        if (!bAtribuirTemporariamente) {
+            lstText.add(pSbComando.toString());
+        } else {
+            sbTemp.append(pSbComando).append("\n");
         }
     }
     
@@ -55,7 +73,11 @@ public class GeradorCodigo {
     }
     
     public void AdicionarStorage(String pSto){
-        lstText.add("STO\t\t" + pSto);
+        if (!pSto.contains("Global")) {
+            lstText.add("STO\t\t" + pSto + "_" + "Global");
+        } else {
+            lstText.add("STO\t\t" + pSto);
+        }
     }
 
     public void GravarArquivo() throws IOException {
@@ -127,12 +149,19 @@ public class GeradorCodigo {
 
     public void AtribuirOperacao(String pOperacao, Object pValor){
         StringBuilder sbComando = new StringBuilder();
-        if (pValor.toString().matches("[0-9]+")) {
-            sbComando.append(pOperacao).append("I").append("\t").append(pValor);
-        }else{
-            sbComando.append(pOperacao).append("\t\t").append(pValor);
+    
+        if (pValor != null) {
+            if (pValor.toString().matches("[0-9]+")) {
+                sbComando.append(pOperacao).append("I").append("\t").append(pValor);
+            } else {
+                sbComando.append(pOperacao).append("\t\t").append(pValor);
+            }
+        } else {
+            sbTemp.append(pOperacao).append("\t\t").append(iEspacoMemoria).append("\n");
+            sbTemp.append("STO\t\t").append(iEspacoMemoria);
         }
-        lstText.add(sbComando.toString());
+
+        PreencherListaText(sbComando);
     }
     
     private String AdicionarInstrucaoVetor(String pVetor, String pEscopo) {
@@ -148,40 +177,55 @@ public class GeradorCodigo {
         return sbComando.toString();
     }
 
+    public void AdicionarEntradaSaida(Simbolos pSimbolos){
+        AdicionarEntradaSaida(pSimbolos, "");
+    }
+    
     ///Adiciona comandos de entrada e saida
-    public void AdicionarEntradaSaida(Simbolos pSimbolo) {
+    public void AdicionarEntradaSaida(Simbolos pSimbolo, String pVetorAtual) {
         switch (pSimbolo.Nome) {
             case "Write":
-                ComandoWrite(pSimbolo);
+                ComandoWrite(pSimbolo, pVetorAtual);
                 break;
             case "Read":
-                ComandoRead(pSimbolo);
+                ComandoRead(pSimbolo, pVetorAtual);
                 break;
         }
     }
 
     //Define o comando de Write
-    private void ComandoWrite(Simbolos pSimbolo) {
+    private void ComandoWrite(Simbolos pSimbolo, String pVetorAtual) {
         StringBuilder sbComando = new StringBuilder();
-        sbComando.append("LD\t\t$out_port");
-        sbComando.append("\n");
-        if (pSimbolo.Valor.toString().matches("[0-9]+") || pSimbolo.Valor.toString().contains("\"")) {
-            sbComando.append("STO\t\t").append(pSimbolo.Valor).append("\n");
+        
+        if (!PossuiValor(pVetorAtual)) {
+            if (pSimbolo.Valor.toString().matches("[0-9]+") || pSimbolo.Valor.toString().contains("\"")) {
+                sbComando.append("LDI\t\t").append(pSimbolo.Valor).append("\n");
+            } else {
+                sbComando.append("LD\t\t").append(pSimbolo.Valor).append("_").append(pSimbolo.Escopo).append("\n");
+            }
+            sbComando.append("STO\t\t$out_port");
+            
         } else {
-            sbComando.append("STO\t\t").append(pSimbolo.Valor).append("_").append(pSimbolo.Escopo).append("\n");
+//            sbComando.append("STOV\t").append(pVetorAtual).append("_").append(pSimbolo.Escopo).append("\n");
+            sbComando.append("STO\t\t$out_port");
         }
 
         lstText.add(sbComando.toString());
     }
 
     //Define o comando Read
-    private void ComandoRead(Simbolos pSimbolo) {
+    private void ComandoRead(Simbolos pSimbolo, String pVetorAtual) {
         StringBuilder sbComando = new StringBuilder();
         sbComando.append("LD\t\t$in_port\n");
-        if (pSimbolo.Valor.toString().matches("[0-9]+")) {
-            sbComando.append("STO\t\t").append(pSimbolo.Valor).append("\n");
+        
+        if (!PossuiValor(pVetorAtual)) {
+            if (pSimbolo.Valor.toString().matches("[0-9]+")) {
+                sbComando.append("STO\t\t").append(pSimbolo.Valor).append("\n");
+            } else {
+                sbComando.append("STO\t\t").append(pSimbolo.Valor).append("_").append(pSimbolo.Escopo).append("\n");
+            }
         } else {
-            sbComando.append("STO\t\t").append(pSimbolo.Valor).append("_").append(pSimbolo.Escopo).append("\n");
+            sbComando.append("STOV\t").append(pVetorAtual).append("_").append(pSimbolo.Escopo).append("\n");
         }
 
         lstText.add(sbComando.toString());
@@ -207,7 +251,7 @@ public class GeradorCodigo {
     }
     
     //Inicia a escrita do assembly carregando o índice e armazenando na posição 1000
-    public void IniciarAssemblyVetor(String pIndice, boolean pAtribuicao, String pVetorAtual){
+    public void IniciarAssemblyVetor(String pIndice, boolean pAtribuicao, String pVetorAtual, String pEhComando){
         StringBuilder sbComando = new StringBuilder();
         
         if (!pAtribuicao) {
@@ -228,9 +272,12 @@ public class GeradorCodigo {
             iEspacoMemoria--;
         }
 
-        if (PossuiValor(pVetorAtual) && pAtribuicao) {
-            sbComando.append("LDV\t\t").append(pVetorAtual);
+        if (PossuiValor(pVetorAtual) && pAtribuicao && pEhComando.equals("Write")) {
+            sbComando.append("LDV\t\t").append(pVetorAtual + "_" + "Global");
         }
+        
+        
+            
 
         lstText.add(sbComando.toString());
         iEspacoMemoria++;
@@ -240,8 +287,16 @@ public class GeradorCodigo {
     public void FinalizarAssemblyVetor(String pVariavel){
         
         StringBuilder sbComando = new StringBuilder();
+        
+         if(lstOperador.size() > 0){
+            for (String operador : lstOperador) {
+                sbComando.append(operador);
+            }
+        }
+         
         sbComando.append("STO\t\t").append(iEspacoMemoria);
         sbComando.append("\n");
+        
         sbComando.append("LD\t\t").append(--iEspacoMemoria);
         sbComando.append("\n");
         sbComando.append("STO\t\t$indr");
@@ -251,5 +306,10 @@ public class GeradorCodigo {
         sbComando.append("STOV\t").append(pVariavel);
         
         lstText.add(sbComando.toString());
+    }
+    
+    ///Seta a lista dos operadores
+    public void SetListOperador(List<String> pLista){
+        this.lstOperador = pLista;
     }
 }

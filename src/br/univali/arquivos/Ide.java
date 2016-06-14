@@ -443,7 +443,18 @@ public class Ide extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+         String text = txtAssembly.getText();
+                JFileChooser chooser = new JFileChooser();
+                chooser.showSaveDialog(null);
+                try {
+                    FileWriter escritor = new FileWriter(chooser.getSelectedFile() + ".asm");
+                    escritor.write(text);
+                    escritor.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    
+                }
+                JOptionPane.showMessageDialog(null, "Arquivo Salvo com Sucesso!");
     }//GEN-LAST:event_jButton5ActionPerformed
 
     /**

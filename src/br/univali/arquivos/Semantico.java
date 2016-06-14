@@ -55,11 +55,17 @@ public class Semantico implements Constants {
                 break;
             case 17:
                 //Ide.tbSimbolos.DefinirEscopo("Read");
+                Ide.tbSimbolos.ehComando = true;
+                Ide.tbSimbolos.sComandoAtual = "Read";
                 Ide.tbSimbolos.DefinirEscopo("Global");
+                Ide.tbSimbolos.IniciarAtribuicao();
                 break;
             case 18:
 //                Ide.tbSimbolos.DefinirEscopo("Write");
+                Ide.tbSimbolos.ehComando = true;
+                Ide.tbSimbolos.sComandoAtual = "Write";
                 Ide.tbSimbolos.DefinirEscopo("Global");
+                Ide.tbSimbolos.IniciarAtribuicao();
                 break;
             case 19:
                 Ide.tbSimbolos.DefinirParametros(token.getLexeme());

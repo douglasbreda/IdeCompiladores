@@ -18,6 +18,8 @@ public class TabelaSimbolos {
     private List<String> lstErros;
 
     public GeradorCodigo oGeradorCodigo = null;
+    
+    public boolean ehComando = false;
 
     //Declara o símbolo que a ser adicionado 
     private Simbolos oSimbolo = null;
@@ -63,6 +65,10 @@ public class TabelaSimbolos {
     private String sVetorAtual = "";
     
     private String sEscopoTemp = "";
+    
+    private List<String> lstOperacoes = new ArrayList<>();
+    
+    public String sComandoAtual = "";
 
     public TabelaSimbolos() {
         lstSimbolos = new ArrayList<>();
@@ -107,16 +113,27 @@ public class TabelaSimbolos {
                 oGeradorCodigo.VerificarAdicionarData(oSimbTemp, sEscopoTemp);
                 bJaDeclarado = true;
                 
-                if(bAtribuindo && bOperacaoComVetor && (sSimboloAtual == null ? sVetorAtual != null : !sSimboloAtual.equals(sVetorAtual)))
+                if (bAtribuindo && bOperacaoComVetor && (sSimboloAtual == null ? sVetorAtual != null : !sSimboloAtual.equals(sVetorAtual))) {
                     oGeradorCodigo.AtribuirText(sSimboloAtual + "_" + sEscopoTemp, "", false);
+                }
+                
+                if (bAtribuindo && bOperacaoComVetor && PossuiValor(sOperacao)) {
+                    //oGeradorCodigo.AtribuirOperacao(sOperacao, null);
+                    
+                    lstOperacoes.add(sOperacao + "\t\t" + sSimboloAtual + "_" + sEscopoTemp + "\n");
+                }
             }
         }
 
     }
+    
+    private boolean PossuiValor(String pComando){
+        return !pComando.equals("");
+    }
 
     //Verifica se ainda não existe a váriavel e outras validações caso necessário
     private boolean ValidarInclusao() {
-        return lstSimbolos.stream().filter(simbolo -> simbolo.Nome.equals(oSimbolo.Nome) && simbolo.Escopo.equals(oSimbolo.Escopo)).collect(Collectors.toList()).isEmpty();
+        return lstSimbolos.stream().filter(simbolo -> simbolo.Nome.equals(oSimbolo.Nome) && simbolo.Escopo.equals(oSimbolo.Escopo) && !simbolo.Tipo.equals("Comando")).collect(Collectors.toList()).isEmpty();
     }
 
     //Adiciona um vetor a lista
@@ -237,6 +254,9 @@ public class TabelaSimbolos {
                     lstSimbolos.get(lstSimbolos.size() - 1).Valor = pValor;
                     oSimboloAtual = lstSimbolos.get(lstSimbolos.size() - 1);
                 }
+                
+                oGeradorCodigo.AtribuirText(oSimboloAtual.Nome, pValor, bOperacaoComVetor);
+                oGeradorCodigo.AdicionarStorage(oSimboloAtual.Nome);
             }
         }
         if (bAtribuindo ) {
@@ -252,7 +272,26 @@ public class TabelaSimbolos {
         if (!sOperacao.equals("")) {
             oGeradorCodigo.AtribuirOperacao(sOperacao, pValor);
         }
-
+        
+        if (bAtribuindo) {
+            if (EhNumero(pValor)) {
+                if (PossuiValor(sOperacao)) {
+                    lstOperacoes.add(sOperacao + "I\t" + pValor.toString() + "\n");
+                } else {
+                    lstOperacoes.add("LDI\t\t" + pValor.toString() + "\n");
+                }
+            } else {
+                if (PossuiValor(sOperacao)) {
+                    lstOperacoes.add(sOperacao + "\t\t" + pValor.toString() + "\n");
+                } else {
+                    lstOperacoes.add("LD\t\t" + pValor.toString() + "\n");
+                }
+            }
+        }
+    }
+    
+    private boolean EhNumero(Object pValor){
+        return pValor.toString().matches("[0-9]+");
     }
 
     //#29
@@ -264,6 +303,7 @@ public class TabelaSimbolos {
     //#34
     //Finalização da atribuição
     public void FinalizarExpressao() {
+        oGeradorCodigo.SetListOperador(lstOperacoes);
         if (!bOperacaoComVetor)
             oGeradorCodigo.AdicionarStorage(sVariavelSetar);
         else
@@ -273,6 +313,7 @@ public class TabelaSimbolos {
         bAtribuindo = false;
         sVarSTO = "";
         bJaDeclarado = false;
+        ehComando = false;
     }
 
     //#22
@@ -364,7 +405,12 @@ public class TabelaSimbolos {
     public void AtribuirValReadWrite(Object pValor) {
         if (lstSimbolos.get(lstSimbolos.size() - 1).Tipo.equals("Comando")) {
             lstSimbolos.get(lstSimbolos.size() - 1).Valor = pValor;
-            oGeradorCodigo.AdicionarEntradaSaida(lstSimbolos.get(lstSimbolos.size() - 1));
+            
+            if (!PossuiValor(sVetorAtual)) {
+                oGeradorCodigo.AdicionarEntradaSaida(lstSimbolos.get(lstSimbolos.size() - 1));
+            } else {
+                oGeradorCodigo.AdicionarEntradaSaida(lstSimbolos.get(lstSimbolos.size() - 1), sVetorAtual);
+            }
         }
     }
 
@@ -372,6 +418,8 @@ public class TabelaSimbolos {
     //Retorna o comando de acordo com a operação
     public void DefinirOperacao(String pOperador) {
 
+        lstOperacoes.add("LD\t\t" + sSimboloAtual + "_" + sEscopoTemp + "\n");
+        
         switch (pOperador) {
             case "+":
                 sOperacao = "ADD";
@@ -418,6 +466,7 @@ public class TabelaSimbolos {
     //Definição de Assembly do vetor
     public void DefinirAssemblyVetor(){
         bOperacaoComVetor = true;
-        oGeradorCodigo.IniciarAssemblyVetor(sIndiceVetor, bAtribuindo, sVetorAtual);
+        oGeradorCodigo.bAtribuirTemporariamente = true;
+        oGeradorCodigo.IniciarAssemblyVetor(sIndiceVetor, bAtribuindo, sVetorAtual, sComandoAtual);
     }
 }
